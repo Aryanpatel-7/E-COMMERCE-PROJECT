@@ -58,7 +58,7 @@ console.log(name, description, price, category, stock);
 // getproduct
 export const getProducts = async (req, res) => {
   try {
-    const products = await Product.find();
+    const products = await Product.find().populate("category");
 
     res.status(200).json({
       success: true,

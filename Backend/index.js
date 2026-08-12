@@ -12,6 +12,7 @@ import productRoutes from "./Routes/productRoutes.js";
 import cartRoutes from "./Routes/cartRoutes.js";
 import orderRoutes from "./Routes/orderRoutes.js";
 import categoryRoutes from "./Routes/categoryRoutes.js";
+import wishlistRoutes from "./Routes/wishlistRoutes.js";
 
 const app = express();
 app.use(cors());
@@ -42,6 +43,8 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/orders",orderRoutes);
 
 app.use("/api/categories",categoryRoutes);
+
+app.use("/api/wishlist", wishlistRoutes);
 
 app.listen(PORT, ()=> {
   console.log(`server is  listening on port ${PORT}`);

@@ -6,6 +6,7 @@ import {
   getCart,
   updateCart,
   removeCartItem,
+  clearCart
 } from "../Controller/cartController.js";
 
 const router = express.Router();
@@ -17,5 +18,7 @@ router.get("/", authUser, getCart);
 router.put("/update", authUser, updateCart);
 
 router.delete("/:id", authUser, removeCartItem);
+
+router.delete("/clear", authUser, clearCart);
 
 export default router;

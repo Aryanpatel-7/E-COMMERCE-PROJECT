@@ -15,26 +15,37 @@ const orderSchema = new mongoose.Schema(
           ref: "Product",
           required: true,
         },
+
         quantity: {
           type: Number,
           required: true,
-          default: 1,
+          min: 1,
         },
       },
     ],
 
-    totalPrice: {
+    totalAmount: {
       type: Number,
       required: true,
     },
 
     status: {
       type: String,
-      enum: ["Pending", "Processing", "Shipped", "Delivered"],
+      enum: [
+        "Pending",
+        "Confirmed",
+        "Shipped",
+        "Delivered",
+        "Cancelled",
+      ],
       default: "Pending",
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-export default mongoose.model("Order", orderSchema);
+const Order = mongoose.model("Order", orderSchema);
+
+export default Order;

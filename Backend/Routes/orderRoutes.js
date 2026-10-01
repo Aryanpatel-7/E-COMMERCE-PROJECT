@@ -14,7 +14,7 @@ router.post("/", authUser, placeOrder);
 
 router.get("/myorders", authUser, getMyOrders);
 
-router.get("/",authUser,adminAuth,getAllOrders);
+router.get("/all",authUser,adminAuth,getAllOrders);
 router.put("/:id",authUser,adminAuth,updateOrderStatus);
 
 

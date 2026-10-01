@@ -139,7 +139,7 @@ export const getProducts = async (req, res) => {
 // getsingleproduct
 export const getSingleProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id).populate("category", "name");
 
     if (!product) {
       return res.status(404).json({

@@ -28,16 +28,40 @@ export const addToCart = async (req, res) => {
 // get user cart
 export const getCart = async (req, res) => {
   try {
-    const cart = await Cart.find({
-      user: req.user.id,
-    }).populate("product");
+    const userId = req.user.id;
+
+    const cart = await Cart.findOne({ user: userId }).populate(
+      "items.product",
+      "name image price"
+    );
+
+    if (!cart) {
+      return res.status(200).json({
+        success: true,
+        totalItems: 0,
+        totalPrice: 0,
+        cart: {
+          items: [],
+        },
+      });
+    }
+
+    let totalItems = 0;
+    let totalPrice = 0;
+
+    cart.items.forEach((item) => {
+      totalItems += item.quantity;
+      totalPrice += item.product.price * item.quantity;
+    });
 
     res.status(200).json({
       success: true,
+      totalItems,
+      totalPrice,
       cart,
     });
   } catch (error) {
-    console.log(error);
+    console.log("Get Cart Error:", error);
 
     res.status(500).json({
       success: false,
@@ -82,6 +106,38 @@ export const removeCartItem = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+ // clearCart
+export const clearCart = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const cart = await Cart.findOne({ user: userId });
+
+    if (!cart) {
+      return res.status(404).json({
+        success: false,
+        message: "Cart not found",
+      });
+    }
+
+    cart.items = [];
+
+    await cart.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Cart cleared successfully",
+      cart,
+    });
+  } catch (error) {
+    console.log("Clear Cart Error:", error);
 
     res.status(500).json({
       success: false,

@@ -2,8 +2,12 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import API from "../api/axios";
 
+import { useAuth } from "../context/AuthContext";
+
 function Login() {
+  const { login } = useAuth();
   const navigate = useNavigate();
+
 
   const [formData, setFormData] = useState({
     email: "",
@@ -29,12 +33,13 @@ function Login() {
       const response = await API.post("/users/login", formData);
 
       const token = response.data.token;
+      const user = response.data.user;
 
       if (!token) {
         throw new Error("Login successful, but token was not received.");
       }
 
-      localStorage.setItem("token", token);
+      login(user, token);
 
       navigate("/");
     } catch (err) {

@@ -9,15 +9,23 @@ function ProductDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [quantity, setQuantity] = useState(1);
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [cartMessage, setCartMessage] = useState("");
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
+        setLoading(true);
+        setError("");
+
         const response = await API.get(`/products/${id}`);
+
         setProduct(response.data.product);
       } catch (err) {
         setError(
           err.response?.data?.message ||
-            "Failed to fetch product details."
+            "Failed to fetch product."
         );
       } finally {
         setLoading(false);
@@ -27,10 +35,48 @@ function ProductDetails() {
     fetchProduct();
   }, [id]);
 
+  const handleAddToCart = async () => {
+    try {
+      setAddingToCart(true);
+      setCartMessage("");
+
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        setCartMessage("Please login first.");
+        return;
+      }
+
+      const response = await API.post(
+        "/cart/add",
+        {
+          productId: product._id,
+          quantity: quantity,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setCartMessage(
+        response.data.message || "Product added to cart successfully!"
+      );
+    } catch (err) {
+      setCartMessage(
+        err.response?.data?.message ||
+          "Failed to add product to cart."
+      );
+    } finally {
+      setAddingToCart(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="text-center py-20 text-xl">
-        Loading product details...
+        Loading product...
       </div>
     );
   }
@@ -39,9 +85,10 @@ function ProductDetails() {
     return (
       <div className="text-center py-20">
         <p className="text-red-600">{error}</p>
+
         <Link
           to="/products"
-          className="inline-block mt-4 text-blue-600 underline"
+          className="inline-block mt-5 bg-blue-600 text-white px-5 py-2 rounded-lg"
         >
           Back to Products
         </Link>
@@ -53,12 +100,6 @@ function ProductDetails() {
     return (
       <div className="text-center py-20">
         Product not found.
-        <Link
-          to="/products"
-          className="block mt-4 text-blue-600 underline"
-        >
-          Back to Products
-        </Link>
       </div>
     );
   }
@@ -74,25 +115,25 @@ function ProductDetails() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mt-8">
         {/* Product Image */}
-        <div className="bg-white rounded-xl shadow-md p-6 flex items-center justify-center">
+        <div className="bg-white rounded-xl shadow-md p-6">
           <img
             src={
               product.image ||
-              "https://placehold.co/500x400?text=Product"
+              "https://placehold.co/600x500?text=Product"
             }
             alt={product.name}
-            className="w-full h-80 object-contain"
+            className="w-full h-[450px] object-contain rounded-lg"
           />
         </div>
 
         {/* Product Information */}
-        <div className="flex flex-col justify-center">
+        <div className="bg-white rounded-xl shadow-md p-8">
           <h1 className="text-3xl font-bold text-gray-800">
             {product.name}
           </h1>
 
-          <p className="text-2xl font-bold text-blue-600 mt-4">
-            ₹{Number(product.price).toLocaleString("en-IN")}
+          <p className="text-2xl font-bold text-blue-600 mt-5">
+            ₹{Number(product.price || 0).toLocaleString("en-IN")}
           </p>
 
           {/* Description */}
@@ -119,14 +160,69 @@ function ProductDetails() {
             </p>
           </div>
 
-          {/* Add to Cart */}
+          {/* Quantity */}
+          <div className="mt-6">
+            <h3 className="font-semibold text-gray-800 mb-2">
+              Quantity:
+            </h3>
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() =>
+                  setQuantity((prev) => Math.max(1, prev - 1))
+                }
+                className="w-10 h-10 bg-gray-200 rounded-lg text-xl font-bold hover:bg-gray-300"
+              >
+                -
+              </button>
+
+              <span className="text-xl font-semibold w-10 text-center">
+                {quantity}
+              </span>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setQuantity((prev) => prev + 1)
+                }
+                className="w-10 h-10 bg-gray-200 rounded-lg text-xl font-bold hover:bg-gray-300"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          {/* Add To Cart */}
           <button
             type="button"
-            disabled
-            className="mt-8 bg-blue-600 text-white px-6 py-3 rounded-lg opacity-60 cursor-not-allowed"
+            onClick={handleAddToCart}
+            disabled={addingToCart}
+            className="w-full mt-8 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-60"
           >
-            Add to Cart (Coming Soon)
+            {addingToCart ? "Adding..." : "Add to Cart"}
           </button>
+
+          {/* Message */}
+          {cartMessage && (
+            <p
+              className={`mt-4 text-center font-medium ${
+                cartMessage.toLowerCase().includes("success")
+                  ? "text-green-600"
+                  : "text-red-600"
+              }`}
+            >
+              {cartMessage}
+            </p>
+          )}
+
+          {/* Go To Cart */}
+          <Link
+            to="/cart"
+            className="block text-center mt-4 border border-blue-600 text-blue-600 py-3 rounded-lg font-semibold hover:bg-blue-50"
+          >
+            Go to Cart
+          </Link>
         </div>
       </div>
     </div>

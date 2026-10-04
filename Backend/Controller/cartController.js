@@ -4,23 +4,70 @@ export const addToCart = async (req, res) => {
   try {
     const { productId, quantity } = req.body;
 
-    const cartItem = await Cart.create({
+    if (!productId) {
+      return res.status(400).json({
+        success: false,
+        message: "Product ID is required",
+      });
+    }
+
+    const qty = Number(quantity) || 1;
+
+    // Find user's cart
+    let cart = await Cart.findOne({
       user: req.user.id,
-      product: productId,
-      quantity,
     });
 
-    res.status(201).json({
+    // If cart doesn't exist, create new cart
+    if (!cart) {
+      cart = await Cart.create({
+        user: req.user.id,
+        items: [
+          {
+            product: productId,
+            quantity: qty,
+          },
+        ],
+      });
+    } else {
+      // Check if product already exists in cart
+      const existingItem = cart.items.find(
+        (item) =>
+          item.product.toString() === productId.toString()
+      );
+
+      if (existingItem) {
+        // Increase quantity
+        existingItem.quantity += qty;
+      } else {
+        // Add new product
+        cart.items.push({
+          product: productId,
+          quantity: qty,
+        });
+      }
+
+      await cart.save();
+    }
+
+    // Get updated cart with product details
+    const updatedCart = await Cart.findById(cart._id).populate(
+      "items.product",
+      "name image price"
+    );
+
+    res.status(200).json({
       success: true,
-      message: "Product added to cart",
-      cartItem,
+      message: "Product added to cart successfully",
+      cart: updatedCart,
     });
   } catch (error) {
-    console.log(error);
+    console.log("Add Cart Error:", error);
 
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
+      error: error.message,
     });
   }
 };
@@ -69,7 +116,8 @@ export const getCart = async (req, res) => {
     });
   }
 };
-// update quantity
+
+// updateCart quantity
 export const updateCart = async (req, res) => {
   try {
     const { cartId, quantity } = req.body;

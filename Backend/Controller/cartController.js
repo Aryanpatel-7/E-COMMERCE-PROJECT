@@ -120,25 +120,68 @@ export const getCart = async (req, res) => {
 // updateCart quantity
 export const updateCart = async (req, res) => {
   try {
-    const { cartId, quantity } = req.body;
+    const { productId, quantity } = req.body;
 
-    const cart = await Cart.findByIdAndUpdate(
-      cartId,
-      { quantity },
-      { new: true }
+    if (!productId || quantity === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Product ID and quantity are required",
+      });
+    }
+
+    const qty = Number(quantity);
+
+    if (qty < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Quantity must be at least 1",
+      });
+    }
+
+    const cart = await Cart.findOne({
+      user: req.user.id,
+    });
+
+    if (!cart) {
+      return res.status(404).json({
+        success: false,
+        message: "Cart not found",
+      });
+    }
+
+    const item = cart.items.find(
+      (item) =>
+        item.product.toString() === productId.toString()
+    );
+
+    if (!item) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found in cart",
+      });
+    }
+
+    item.quantity = qty;
+
+    await cart.save();
+
+    const updatedCart = await Cart.findById(cart._id).populate(
+      "items.product",
+      "name image price"
     );
 
     res.status(200).json({
       success: true,
-      message: "Cart updated",
-      cart,
+      message: "Cart updated successfully",
+      cart: updatedCart,
     });
   } catch (error) {
-    console.log(error);
+    console.log("Update Cart Error:", error);
 
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
+      error: error.message,
     });
   }
 };
@@ -146,21 +189,60 @@ export const updateCart = async (req, res) => {
 // remove item
 export const removeCartItem = async (req, res) => {
   try {
-    await Cart.findByIdAndDelete(req.params.id);
+    const { productId } = req.params;
+
+    const cart = await Cart.findOne({
+      user: req.user.id,
+    });
+
+    if (!cart) {
+      return res.status(404).json({
+        success: false,
+        message: "Cart not found",
+      });
+    }
+
+    const itemExists = cart.items.some(
+      (item) =>
+        item.product.toString() === productId.toString()
+    );
+
+    if (!itemExists) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found in cart",
+      });
+    }
+
+    cart.items = cart.items.filter(
+      (item) =>
+        item.product.toString() !== productId.toString()
+    );
+
+    await cart.save();
+
+    const updatedCart = await Cart.findById(cart._id).populate(
+      "items.product",
+      "name image price"
+    );
 
     res.status(200).json({
       success: true,
       message: "Item removed from cart",
+      cart: updatedCart,
     });
   } catch (error) {
-    console.log(error);
+    console.log("Remove Cart Error:", error);
 
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
+      error: error.message,
     });
   }
 };
+
+
  // clearCart
 export const clearCart = async (req, res) => {
   try {

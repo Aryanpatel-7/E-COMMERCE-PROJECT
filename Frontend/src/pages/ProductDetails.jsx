@@ -122,7 +122,7 @@ function ProductDetails() {
               "https://placehold.co/600x500?text=Product"
             }
             alt={product.name}
-            className="w-full h-[450px] object-contain rounded-lg"
+            className="w-full `h-[450px]` object-contain rounded-lg"
           />
         </div>
 

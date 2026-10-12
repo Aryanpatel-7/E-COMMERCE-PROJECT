@@ -11,6 +11,8 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Cart from "./pages/Cart";
 import NotFound from "./pages/NotFound";
+import Checkout from "./pages/Checkout";
+import MyOrders from "./pages/MyOrders";
 
 import { AuthProvider } from "./context/AuthContext";
 
@@ -33,6 +35,8 @@ function App() {
        {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
         <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/my-orders" element={<MyOrders />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

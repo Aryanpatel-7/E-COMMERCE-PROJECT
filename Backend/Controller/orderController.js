@@ -1,11 +1,12 @@
 import Order from "../Model/order.js";
 
 // Place Order
+// Place Order
 export const placeOrder = async (req, res) => {
   try {
-    const { products, totalPrice } = req.body;
+    const { products, totalPrice, shippingAddress } = req.body;
 
-    if (!products || products.length === 0) {
+    if (!Array.isArray(products) || products.length === 0) {
       return res.status(400).json({
         success: false,
         message: "Products are required",
@@ -19,10 +20,32 @@ export const placeOrder = async (req, res) => {
       });
     }
 
+    const requiredFields = [
+      "fullname",
+      "phone",
+      "address",
+      "city",
+      "state",
+      "pincode",
+    ];
+
+    if (
+      !shippingAddress ||
+      requiredFields.some(
+        (field) => !String(shippingAddress[field] || "").trim()
+      )
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Complete shipping address is required",
+      });
+    }
+
     const order = await Order.create({
       user: req.user.id,
       products,
-        totalAmount: totalPrice,
+      totalAmount: totalPrice,
+      shippingAddress,
       status: "Pending",
     });
 

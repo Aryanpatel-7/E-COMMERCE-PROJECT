@@ -352,13 +352,14 @@ function Cart() {
               </span>
             </div>
 
-            <button
-              type="button"
-              disabled
-              className="w-full mt-6 bg-blue-600 text-white py-3 rounded-lg opacity-60 cursor-not-allowed"
-            >
-              Proceed to Checkout (Coming Soon)
-            </button>
+           
+<Link
+  to="/checkout"
+  className="mt-6 inline-block w-full rounded-lg bg-green-600 py-3 text-center font-semibold text-white hover:bg-green-700"
+>
+  Proceed to Checkout
+</Link>
+
           </div>
         </div>
       )}

@@ -13,7 +13,8 @@ router.get("/:id",getSingleProduct);
 
 router.post("/",authUser, upload.single("image"),addProduct);
 //router.post("/", upload.single("image"), addProduct);
-router.put("/:id",authUser,updateProduct);
+//router.put("/:id",authUser,updateProduct);
+router.put("/:id", authUser, upload.single("image"), updateProduct);
 router.delete("/:id",authUser,deleteProduct);
 
 

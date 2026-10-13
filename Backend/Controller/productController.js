@@ -163,15 +163,43 @@ export const getSingleProduct = async (req, res) => {
 };
 
 // update Product
+
 export const updateProduct = async (req, res) => {
   try {
+    const { name, description, price, category, stock } = req.body;
+
+    const updateData = {
+      name,
+      description,
+      price,
+      category,
+      stock,
+    };
+
+    // Upload a new image only if one was selected
+    if (req.file) {
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "ecommerce-products" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+
+        streamifier
+          .createReadStream(req.file.buffer)
+          .pipe(stream);
+      });
+
+      updateData.image = result.secure_url;
+    }
+
     const product = await Product.findByIdAndUpdate(
       req.params.id,
-      req.body,
-      {
-        new: true,
-      }
-    );
+      updateData,
+      {  returnDocument: "after", runValidators: true }
+    ).populate("category", "name");
 
     if (!product) {
       return res.status(404).json({
@@ -186,7 +214,7 @@ export const updateProduct = async (req, res) => {
       product,
     });
   } catch (error) {
-    console.log(error);
+    console.log("Update Product Error:", error);
 
     res.status(500).json({
       success: false,
@@ -194,6 +222,7 @@ export const updateProduct = async (req, res) => {
     });
   }
 };
+
 
 // deleteProduct
 export const deleteProduct = async (req, res) => {

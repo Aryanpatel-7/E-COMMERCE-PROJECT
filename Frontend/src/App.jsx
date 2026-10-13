@@ -13,6 +13,8 @@ import Cart from "./pages/Cart";
 import NotFound from "./pages/NotFound";
 import Checkout from "./pages/Checkout";
 import MyOrders from "./pages/MyOrders";
+import OrderDetails from "./pages/OrderDetails";
+import AdminOrders from "./pages/AdminOrders";
 
 import { AuthProvider } from "./context/AuthContext";
 
@@ -37,6 +39,8 @@ function App() {
         <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/my-orders" element={<MyOrders />} />
+          <Route path="/my-orders/:id" element={<OrderDetails />} />
+          <Route path="/admin/orders" element={<AdminOrders />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

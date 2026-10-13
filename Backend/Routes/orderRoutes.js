@@ -5,6 +5,7 @@ import {
   placeOrder,
   getMyOrders,
   getAllOrders,
+   getOrderById,
   updateOrderStatus,
 } from "../Controller/orderController.js";
 
@@ -17,5 +18,8 @@ router.get("/myorders", authUser, getMyOrders);
 router.get("/all",authUser,adminAuth,getAllOrders);
 router.put("/:id",authUser,adminAuth,updateOrderStatus);
 
+
+// Get one order's details
+router.get("/:id", authUser, getOrderById);
 
 export default router;

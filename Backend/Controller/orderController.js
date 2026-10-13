@@ -1,7 +1,8 @@
+  import mongoose from "mongoose";
 import Order from "../Model/order.js";
 
 // Place Order
-// Place Order
+
 export const placeOrder = async (req, res) => {
   try {
     const { products, totalPrice, shippingAddress } = req.body;
@@ -131,13 +132,17 @@ export const updateOrderStatus = async (req, res) => {
       });
     }
 
-    const order = await Order.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true, runValidators: true }
-    )
-      .populate("user", "fullname email")
-      .populate("products.product");
+  
+const order = await Order.findByIdAndUpdate(
+  req.params.id,
+  { status },
+  {
+    returnDocument: "after",
+    runValidators: true,
+  }
+)
+  .populate("user", "fullname email")
+  .populate("products.product");
 
     if (!order) {
       return res.status(404).json({
@@ -155,6 +160,46 @@ export const updateOrderStatus = async (req, res) => {
     console.log("Update Order Status Error:", error);
 
     res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+// Get Single Order Details
+export const getOrderById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validate MongoDB ObjectId
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid order ID",
+      });
+    }
+
+    // User can access only their own order
+    const order = await Order.findOne({
+      _id: id,
+      user: req.user.id,
+    }).populate("products.product");
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      order,
+    });
+  } catch (error) {
+    console.log("Get Order Details Error:", error);
+
+    return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });

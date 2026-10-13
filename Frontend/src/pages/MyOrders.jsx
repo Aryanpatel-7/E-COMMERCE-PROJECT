@@ -1,6 +1,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import API from "../api/axios";
+import { Link } from "react-router-dom";
 
 function MyOrders() {
   const [orders, setOrders] = useState([]);
@@ -197,6 +198,12 @@ function MyOrders() {
                   )}
                 </span>
               </div>
+              <Link
+  to={`/my-orders/${order._id}`}
+  className="mt-4 inline-block rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+>
+  View Details
+</Link>
             </div>
           ))}
         </div>

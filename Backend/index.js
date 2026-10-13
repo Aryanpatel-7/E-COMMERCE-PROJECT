@@ -15,6 +15,7 @@ import categoryRoutes from "./Routes/categoryRoutes.js";
 import wishlistRoutes from "./Routes/wishlistRoutes.js";
 import reviewRoutes from "./Routes/reviewRoutes.js";
 import paymentRoutes from "./Routes/paymentRoutes.js";
+import adminDashboardRoutes from "./Routes/adminDashboardRoutes.js";
 
 const app = express();
 app.use(cors());
@@ -51,6 +52,8 @@ app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/reviews", reviewRoutes);
 
 app.use("/api/payments", paymentRoutes);
+
+app.use("/api/admin/dashboard", adminDashboardRoutes);
 
 app.listen(PORT, ()=> {
   console.log(`server is  listening on port ${PORT}`);
